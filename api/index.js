@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // API KEY CHECK: Yahan apni key lazmi check karein
-const groq = new Groq({ apiKey: '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' });
+const groq = new Groq({ apiKey: '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' });
 
 app.post('/chat', async (req, res) => {
     try {
