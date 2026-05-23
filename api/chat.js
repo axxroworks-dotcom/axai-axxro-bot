@@ -1,7 +1,7 @@
 const Groq = require('groq-sdk');
 
 const groq = new Groq({
-    apiKey: 'YOUR_GROQ_KEY'
+    apiKey: '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'
 });
 
 module.exports = async function handler(req, res) {
@@ -24,20 +24,27 @@ module.exports = async function handler(req, res) {
 
         const { messages } = req.body;
 
+        console.log("MESSAGES:", messages);
+
         const completion =
             await groq.chat.completions.create({
                 messages,
                 model: 'llama-3.3-70b-versatile'
             });
 
+        console.log("FULL COMPLETION:", completion);
+
+        const aiReply =
+            completion?.choices?.[0]?.message?.content
+            || "No AI response generated.";
+
         return res.status(200).json({
-            reply:
-                completion.choices[0].message.content
+            reply: aiReply
         });
 
     } catch (error) {
 
-        console.error(error);
+        console.error("BACKEND ERROR:", error);
 
         return res.status(500).json({
             error: error.message
