@@ -1,31 +1,47 @@
-const express = require('express');
-const cors = require('cors');
-const { Groq } = require('groq-sdk');
+import { Groq } from 'groq-sdk';
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY
+});
 
-// API KEY CHECK: Yahan apni key lazmi check karein
-const groq = new Groq({ apiKey: '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' });
+export default async function handler(req, res) {
 
-app.post('/chat', async (req, res) => {
+    // CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
+    if (req.method !== 'POST') {
+        return res.status(405).json({
+            error: 'Method not allowed'
+        });
+    }
+
     try {
-        const { messages } = req.body; 
-        console.log("Received messages from frontend...");
+
+        const { messages } = req.body;
 
         const completion = await groq.chat.completions.create({
-            messages: messages, // Frontend training passing here
-            model: "llama-3.3-70b-versatile",
+            messages,
+            model: 'llama-3.3-70b-versatile'
         });
 
         const aiReply = completion.choices[0].message.content;
-        res.json({ reply: aiReply });
-    } catch (error) {
-        console.error("SERVER ERROR:", error.message);
-        res.status(500).json({ reply: "Server error: " + error.message });
-    }
-});
 
-// app.listen hata dein aur ye likhein:
-module.exports = app;
+        return res.status(200).json({
+            reply: aiReply
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            error: error.message
+        });
+    }
+}
